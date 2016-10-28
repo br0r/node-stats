@@ -15,17 +15,21 @@ def readStats():
     f.close()
     plt.clf()
     data = pd.DataFrame(m['heap']).get('v')
+    plt.subplot(211)
+    plt.title("Heap")
     plt.plot(data)
-    fig.canvas.draw()
 
+    plt.subplot(212)
+    plt.title("Block")
+    df = pd.DataFrame(m['block']).get('v')
+    if df is not None and len(df) > 1:
+        plt.hist(df)
+    fig.canvas.draw()
 
 def handler(signum, frame):
     readStats()
-    signal.alarm(2)
 
-signal.signal(signal.SIGALRM, handler)
-signal.alarm(1)
-readStats()
+signal.signal(signal.SIGUSR1, handler)
 
 while True:
     time.sleep(1)
