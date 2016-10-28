@@ -27,15 +27,26 @@ function writeStatsFile(cb) {
   });
 }
 
-var plot = spawn('python', [path.join(__dirname, '../read_stats.py'), path.join(process.cwd(), 'stats.json')], {stdio: ['pipe', process.stdout, process.stderr]});
+var plot;
 
-plot.on('exit', function() {
-  console.error('plot died', arguments);
-});
+function createPlot() {
+  var scriptPath = path.join(__dirname, '../read_stats.py');
+  var statsFile = path.join(process.cwd(), 'stats.json');
+  plot = spawn('python', [scriptPath, statsFile],  {stdio: ['pipe', process.stdout, process.stderr]});
 
-plot.on('data', function(data) {
-  console.log('got data');
-});
+  plot.on('exit', function() {
+    i += 1;
+    console.error('plot died', arguments);
+    // Restart plot max 5 times
+    // Tmp fix until solved dying issues.
+    if (i < 5) {
+      createPlot();
+    }
+  });
+}
+
+createPlot();
+var i = 0;
 
 function sendAlarm() {
   plot.kill('SIGUSR1');
