@@ -13,8 +13,6 @@ blocked(function(ms) {
 });
 
 function writeStatsFile(cb) {
-  //global.gc();
-  // Should we read already written data from file? Or just store it all in memory?
   fs.writeFile('stats.json', JSON.stringify({heap: heap, block: block}), function(err) {
     if (err) {
       console.error('Failed to write stats.json', err);
@@ -53,11 +51,14 @@ function sendAlarm() {
 }
 
 process.on('SIGINT', function() {
-  plot.kill();
   writeStatsFile(function() {
     sendAlarm();
     process.exit(0);
   });
+});
+
+process.on('exit', function() {
+  plot.kill();
 });
 
 setInterval(function() {

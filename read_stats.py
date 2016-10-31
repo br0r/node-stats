@@ -32,4 +32,7 @@ def handler(signum, frame):
 signal.signal(signal.SIGUSR1, handler)
 
 while True:
-    time.sleep(1)
+    try:
+        time.sleep(1)
+    except KeyboardInterrupt:
+        sys.exit(0)
